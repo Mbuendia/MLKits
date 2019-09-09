@@ -8,24 +8,24 @@ function onScoreUpdate(dropPosition, bounciness, size, bucketLabel) {
 
 function runAnalysis() {
   // cantidad de iteraciones que se hacem
-  const testSetSize = 300;
+  const testSetSize = 400;
   // destructuring de la division de los arrays que se recogen en la web
   const [testSet, trainingSet] = splitDataset(outputs, testSetSize);
   //funcion de lodash que hace un array de los numeros que se pongan (solucion pija para un for de toda la vida)
-  _.range(1, 40).forEach(k => {
+  _.range(1, 10).forEach(k => {
 
     //se hacen varios test para ver el porcentaje de accierto del algoritmo
     const accuracy = _.chain(testSet)
-    .filter(testPoint => knn(trainingSet, testPoint[0], k) === testPoint[3])
-    .size()
-    .divide(testSetSize)
-    .value();
+      .filter(testPoint => knn(trainingSet, _.initial(testPoint), k) === testPoint[3])
+      .size()
+      .divide(testSetSize)
+      .value();
 
-   console.log('For k of', k, ' Accuracy:', Math.floor(accuracy*100));
-});
-  
+    console.log('For k of', k, ' Accuracy:', Math.floor(accuracy * 100));
+  });
 
- 
+
+
 }
 
 /* 
@@ -45,7 +45,7 @@ function knn(data, point, k) {
   //10. lo parsea a numero ej: 4
   //11. termina el conjunto de operaciones value()
   return _.chain(data)
-    .map(ball => [distance(ball[0], point), ball[3]])
+    .map(ball => [distance(_.initial(ball), point), _.last(ball)])
     .sortBy(row => row[0])
     .slice(0, k)
     .countBy(row => row[1])
@@ -58,9 +58,12 @@ function knn(data, point, k) {
 }
 
 //la distancia entre un punto a en un diagrma en 2 dimensiones (X, Y) donde X es el pnto donde se suelta la pelota(linear) e Y el cubo donde llega (del 1 al 10(discreto))
-//TODO: Continuacion de la siguiente parte del curso, seccion 2
 function distance(pointA, pointB) {
-  return Math.abs(pointA - pointB);
+  return _.chain(pointA)
+            .zip(pointB)
+            .map(([a, b]) => (a - b) ** 2)
+            .sum()
+            .value() ** 0.5;
 }
 
 //shuffle es barajar, lo que hace esta funcion es poner de forma aleatoria los numeros de el array que se pasa,
@@ -73,5 +76,12 @@ function splitDataset(data, testCount) {
   const testSet = _.slice(shuffled, 0, testCount);
   const trainingSet = _.slice(shuffled, testCount);
   return [testSet, trainingSet];
+
+}
+
+function minMax(data, featureCount) {
+  const min = _.min(data);
+  const max = _.max(data);
+  //TODO: hacer bien la seccion 28 y 29, entenderla.
 
 }
